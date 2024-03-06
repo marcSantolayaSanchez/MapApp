@@ -1,4 +1,6 @@
 package com.example.mapsapp.viewModel
 
-class MapAppViewModel {
+import androidx.lifecycle.ViewModel
+
+class MapAppViewModel : ViewModel(){
 }
