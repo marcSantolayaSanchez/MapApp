@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
@@ -24,11 +25,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.mapsapp.viewModel.MapAppViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -42,6 +44,8 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.launch
 
+
+
 @Composable
 fun MapScreen(navController: NavController) {
     MyDrawer(myViewModel = MapAppViewModel())
@@ -50,7 +54,6 @@ fun MapScreen(navController: NavController) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyDrawer(myViewModel: MapAppViewModel) {
-    val navigationController = rememberNavController()
     val scope = rememberCoroutineScope()
     val state: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     ModalNavigationDrawer(drawerState = state, gesturesEnabled = false, drawerContent = {
@@ -76,7 +79,8 @@ fun MyDrawer(myViewModel: MapAppViewModel) {
 }
 
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState) {
@@ -86,7 +90,15 @@ fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState) {
                 .fillMaxHeight()
                 .padding(it)
         ) {
-            Mapa()
+            Mapa(myViewModel)
+            //val sheetState = rememberModalBottomSheetState()
+            val scope = rememberCoroutineScope()
+            val showBottomSheet by myViewModel.mostrarShowBottom.observeAsState(false)
+            if (showBottomSheet) {
+                ModalBottomSheet(onDismissRequest = { /* Executed when the sheet is dismissed */ }) {
+                    // Sheet content
+                }
+            }
         }
     }
 }
@@ -97,7 +109,7 @@ fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState) {
 fun myToppAppBar(myViewModel: MapAppViewModel, state: DrawerState) {
     val scope = rememberCoroutineScope()
     TopAppBar(
-        title = { Text(text = "MAPA SUPERCHULO") },
+        title = { Text(text = "Mapa") },
         navigationIcon = {
             IconButton(onClick = { scope.launch { state.open() } }) {
                 Icon(imageVector = Icons.Filled.Menu, contentDescription = "Menu")
@@ -107,12 +119,13 @@ fun myToppAppBar(myViewModel: MapAppViewModel, state: DrawerState) {
 }
 
 @Composable
-fun Mapa() {
+fun Mapa(myViewModel: MapAppViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
+
         val itb = LatLng(41.4534265, 2.1837151)
         val cameraPositionState = rememberCameraPositionState() {
             position = CameraPosition.fromLatLngZoom(itb, 10f)
