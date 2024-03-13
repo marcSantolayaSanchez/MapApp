@@ -8,15 +8,20 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
@@ -63,7 +68,7 @@ fun MyDrawer(myViewModel: MapAppViewModel) {
                     Icon(imageVector = Icons.Filled.Close, contentDescription = "Close")
                 }
                 Text("Marcadores", modifier = Modifier.padding(12.dp))
-                Divider()
+                HorizontalDivider()
             }
             NavigationDrawerItem(
                 label = { Text(text = "Marcador 1") }, selected = false, onClick = {
@@ -81,9 +86,12 @@ fun MyDrawer(myViewModel: MapAppViewModel) {
 
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState) {
+    val sheetState = rememberModalBottomSheetState(true)
+    val scope = rememberCoroutineScope()
+    val showBottomSheet by myViewModel.mostrarShowBottom.observeAsState(false)
     Scaffold(topBar = { myToppAppBar(myViewModel = MapAppViewModel(), state) }) {
         Box(
             modifier = Modifier
@@ -91,20 +99,33 @@ fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState) {
                 .padding(it)
         ) {
             Mapa(myViewModel)
-            //val sheetState = rememberModalBottomSheetState()
-            val scope = rememberCoroutineScope()
-            val showBottomSheet by myViewModel.mostrarShowBottom.observeAsState(false)
             if (showBottomSheet) {
-                ModalBottomSheet(onDismissRequest = { /* Executed when the sheet is dismissed */ }) {
-                    // Sheet content
+                ModalBottomSheet(
+                    onDismissRequest = {
+                        myViewModel.esconderBottomSheet()
+                    },
+                    sheetState = sheetState
+                ) {
+                    Row {
+                        TextField(value = "", onValueChange = )
+                    }
+                    /*
+                    Button(onClick = {
+                        scope.launch { sheetState.hide() }.invokeOnCompletion {
+                            if (!sheetState.isVisible) {
+                                myViewModel.showBottomSheet()
+                            }
+                        }
+                    }) {
+                        Text("Hide bottom sheet")
+                    }*/
                 }
             }
         }
     }
 }
 
-
-@OptIn(ExperimentalMaterial3Api::class)
+        @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun myToppAppBar(myViewModel: MapAppViewModel, state: DrawerState) {
     val scope = rememberCoroutineScope()
@@ -137,7 +158,7 @@ fun Mapa(myViewModel: MapAppViewModel) {
             uiSettings = MapUiSettings(compassEnabled = true, mapToolbarEnabled = true, myLocationButtonEnabled = true),
             onMapClick = {
             }, onMapLongClick = {
-
+                myViewModel.showBottomSheet(it)
             }
 
         ){
@@ -152,3 +173,4 @@ fun Mapa(myViewModel: MapAppViewModel) {
         }
     }
 }
+
