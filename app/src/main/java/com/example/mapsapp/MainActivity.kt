@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.mapsapp.Navigation.Routes
+import com.example.mapsapp.View.CamaraScreen
 import com.example.mapsapp.View.MapScreen
 import com.example.mapsapp.View.MyDrawer
 import com.example.mapsapp.viewModel.MapAppViewModel
@@ -36,6 +37,7 @@ class MainActivity : ComponentActivity() {
                         startDestination = Routes.MapsScreen.route
                     ) {
                         composable(Routes.MapsScreen.route) { MapScreen(navController = navigationController) }
+                        composable(Routes.CamaraScreen.route){CamaraScreen(navController = navigationController)}
                     }
                 }
             }
