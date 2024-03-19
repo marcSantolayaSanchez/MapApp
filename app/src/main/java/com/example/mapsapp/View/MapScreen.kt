@@ -1,8 +1,16 @@
 package com.example.mapsapp.View
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Intent
 import android.location.Location
+import android.net.Uri
+import android.provider.Settings
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,13 +52,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.navigation.NavController
 import com.example.mapsapp.MainActivity
+import com.example.mapsapp.Navigation.Routes
 import com.example.mapsapp.viewModel.MapAppViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -70,14 +82,14 @@ import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.launch
 
 
+
 @Composable
 fun MapScreen(navController: NavController) {
-    MyDrawer(myViewModel = MapAppViewModel())
+    MyDrawer(myViewModel = MapAppViewModel(), navController)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyDrawer(myViewModel: MapAppViewModel) {
+fun MyDrawer(myViewModel: MapAppViewModel, navController: NavController) {
     val scope = rememberCoroutineScope()
     val state: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     ModalNavigationDrawer(drawerState = state, gesturesEnabled = false, drawerContent = {
@@ -97,7 +109,7 @@ fun MyDrawer(myViewModel: MapAppViewModel) {
                 })
         }
     }) {
-        miScaffold(myViewModel, state)
+        miScaffold(myViewModel, state, navController)
 
     }
 }
@@ -108,7 +120,11 @@ fun MyDrawer(myViewModel: MapAppViewModel) {
     ExperimentalPermissionsApi::class
 )
 @Composable
-fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState) {
+fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState, navController: NavController) {
+    val isCameraPermissionGranted by myViewModel.cameraPermissionGranted.observeAsState(false)
+    val shouldShowPermissionRationale by myViewModel.shouldShowPermissionRationale.observeAsState(false)
+    val showPermissionDenied by myViewModel.showPermissionDenied.observeAsState(false)
+    val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(true)
     val scope = rememberCoroutineScope()
     var tituloMarcador by rememberSaveable {
@@ -197,19 +213,41 @@ fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState) {
                         }) {
                             Text(text = "BOTON QUE AÑADE")
                         }
-                    }
 
 
-                    /*
-                    Button(onClick = {
-                        scope.launch { sheetState.hide() }.invokeOnCompletion {
-                            if (!sheetState.isVisible) {
-                                myViewModel.showBottomSheet()
+                        val launcher = rememberLauncherForActivityResult(
+                            contract = ActivityResultContracts.RequestPermission(),
+                            onResult = { isGranted ->
+                                if (isGranted) {
+                                    myViewModel.setCameraPermissionGranted(true)
+                                } else {
+                                    myViewModel.setShouldShowPermissionRationale(
+                                        shouldShowRequestPermissionRationale(
+                                            context as Activity,
+                                            Manifest.permission.CAMERA
+                                        )
+                                    )
+                                    if (shouldShowPermissionRationale) {
+                                        Log.i("CamaraScreen", "No podemos volver a pedir permisos")
+                                        myViewModel.setShowPermissionDenied(true)
+                                    }
+                                }
+                            })
+                        Button(onClick = {
+                            if (!isCameraPermissionGranted){
+                                launcher.launch(android.Manifest.permission.CAMERA)
+                            }else{
+                                navController.navigate(Routes.CamaraScreen.route)
+
                             }
+                        }) {
+                            Text(text = "HAZ FOTO")
                         }
-                    }) {
-                        Text("Hide bottom sheet")
-                    }*/
+
+                    }
+                    if(showPermissionDenied){
+                        PermissionDeclinedScreen()
+                    }
                 }
             }
         }
@@ -229,6 +267,7 @@ fun myToppAppBar(myViewModel: MapAppViewModel, state: DrawerState) {
         }
     )
 }
+
 @SuppressLint("MissingPermission")
 @Composable
 fun Mapa(myViewModel: MapAppViewModel) {
@@ -237,17 +276,17 @@ fun Mapa(myViewModel: MapAppViewModel) {
         remember {
             LocationServices.getFusedLocationProviderClient(context)
         }
-    var lastKnowLocation by remember {mutableStateOf<Location?>(null)}
-    var deviceLatLng by remember { mutableStateOf(LatLng(0.0,0.0))}
+    var lastKnowLocation by remember { mutableStateOf<Location?>(null) }
+    var deviceLatLng by remember { mutableStateOf(LatLng(0.0, 0.0)) }
     val cameraPositionState =
-        rememberCameraPositionState{position = CameraPosition.fromLatLngZoom (deviceLatLng,18f)}
-    val locationResult = fusedLocationProviderClient.getCurrentLocation(100,null)
-    locationResult.addOnCompleteListener(context as MainActivity){task ->
-        if (task.isSuccessful){
+        rememberCameraPositionState { position = CameraPosition.fromLatLngZoom(deviceLatLng, 18f) }
+    val locationResult = fusedLocationProviderClient.getCurrentLocation(100, null)
+    locationResult.addOnCompleteListener(context as MainActivity) { task ->
+        if (task.isSuccessful) {
             lastKnowLocation = task.result
-            deviceLatLng = LatLng(lastKnowLocation!!.latitude,lastKnowLocation!!.longitude)
-            cameraPositionState.position = CameraPosition.fromLatLngZoom(deviceLatLng,18f)
-        } else{
+            deviceLatLng = LatLng(lastKnowLocation!!.latitude, lastKnowLocation!!.longitude)
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(deviceLatLng, 18f)
+        } else {
             Log.e("Error", "Exception : %s", task.exception)
         }
 
@@ -303,17 +342,32 @@ fun Mapa(myViewModel: MapAppViewModel) {
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-fun Camara(){
-    val permissionState =
-        rememberPermissionState(permission = android.Manifest.permission.CAMERA)
-    LaunchedEffect(Unit) {
-        permissionState.launchPermissionRequest()
-    }
-    if(permissionState.status.isGranted){
 
+
+@Composable
+fun PermissionDeclinedScreen(){
+val context = LocalContext.current
+    Column (
+        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ){
+        Text(text = "Permission required", fontWeight = FontWeight.Bold)
+        Text(text = "This app needs acces to the camera to take photos")
+        Button(onClick = {
+            openAppSettings(context as Activity)
+        }) {
+        Text(text = "Accept")
+        }
     }
+}
+
+fun openAppSettings(activity: Activity){
+    val intent = Intent().apply{
+        action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+        data = Uri.fromParts("package", activity.packageName, null)
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    }
+    activity.startActivity(intent)
 }
 
 

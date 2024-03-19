@@ -30,14 +30,15 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
 
-                    MyDrawer(myViewModel)
+
                     val navigationController = rememberNavController()
+                    MyDrawer(myViewModel = MapAppViewModel(), navigationController)
                     NavHost(
                         navController = navigationController,
                         startDestination = Routes.MapsScreen.route
                     ) {
                         composable(Routes.MapsScreen.route) { MapScreen(navController = navigationController) }
-                        composable(Routes.CamaraScreen.route){CamaraScreen(navController = navigationController)}
+                        composable(Routes.CamaraScreen.route){CamaraScreen(navController = navigationController, myViewModel)}
                     }
                 }
             }
