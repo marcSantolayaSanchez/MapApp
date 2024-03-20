@@ -63,7 +63,7 @@ fun CamaraScreen(navController: NavController, myViewModel: MapAppViewModel) {
         CameraPreview(controller = controller, modifier = Modifier.fillMaxSize())
         Row(modifier = Modifier.fillMaxWidth()
             .padding(top = 40.dp)
-            .padding(start = 155.dp))
+            .padding(start = 185.dp))
             {
             IconButton(
                 onClick = {

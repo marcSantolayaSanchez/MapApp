@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.mapsapp.Navigation.Routes
 import com.example.mapsapp.View.CamaraScreen
+import com.example.mapsapp.View.GalleryScreen
 import com.example.mapsapp.View.MapScreen
 import com.example.mapsapp.View.MyDrawer
 import com.example.mapsapp.viewModel.MapAppViewModel
@@ -39,6 +40,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable(Routes.MapsScreen.route) { MapScreen(navController = navigationController) }
                         composable(Routes.CamaraScreen.route){CamaraScreen(navController = navigationController, myViewModel)}
+                        composable(Routes.GalleryScreen.route){ GalleryScreen(navController = navigationController, myViewModel) }
                     }
                 }
             }

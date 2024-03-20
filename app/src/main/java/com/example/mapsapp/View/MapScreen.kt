@@ -82,7 +82,6 @@ import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.launch
 
 
-
 @Composable
 fun MapScreen(navController: NavController) {
     MyDrawer(myViewModel = MapAppViewModel(), navController)
@@ -122,7 +121,9 @@ fun MyDrawer(myViewModel: MapAppViewModel, navController: NavController) {
 @Composable
 fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState, navController: NavController) {
     val isCameraPermissionGranted by myViewModel.cameraPermissionGranted.observeAsState(false)
-    val shouldShowPermissionRationale by myViewModel.shouldShowPermissionRationale.observeAsState(false)
+    val shouldShowPermissionRationale by myViewModel.shouldShowPermissionRationale.observeAsState(
+        false
+    )
     val showPermissionDenied by myViewModel.showPermissionDenied.observeAsState(false)
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(true)
@@ -234,9 +235,9 @@ fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState, navController: 
                                 }
                             })
                         Button(onClick = {
-                            if (!isCameraPermissionGranted){
+                            if (!isCameraPermissionGranted) {
                                 launcher.launch(android.Manifest.permission.CAMERA)
-                            }else{
+                            } else {
                                 navController.navigate(Routes.CamaraScreen.route)
 
                             }
@@ -245,7 +246,16 @@ fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState, navController: 
                         }
 
                     }
-                    if(showPermissionDenied){
+                    Row {
+                        Button(onClick = {
+                            if (!isCameraPermissionGranted) {
+                                navController.navigate(Routes.GalleryScreen.route)
+                            }
+                        }) {
+                            Text(text = "GALERIA")
+                        }
+                    }
+                    if (showPermissionDenied) {
                         PermissionDeclinedScreen()
                     }
                 }
@@ -343,26 +353,26 @@ fun Mapa(myViewModel: MapAppViewModel) {
 }
 
 
-
 @Composable
-fun PermissionDeclinedScreen(){
-val context = LocalContext.current
-    Column (
-        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center,
+fun PermissionDeclinedScreen() {
+    val context = LocalContext.current
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize()
-    ){
+    ) {
         Text(text = "Permission required", fontWeight = FontWeight.Bold)
         Text(text = "This app needs acces to the camera to take photos")
         Button(onClick = {
             openAppSettings(context as Activity)
         }) {
-        Text(text = "Accept")
+            Text(text = "Accept")
         }
     }
 }
 
-fun openAppSettings(activity: Activity){
-    val intent = Intent().apply{
+fun openAppSettings(activity: Activity) {
+    val intent = Intent().apply {
         action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
         data = Uri.fromParts("package", activity.packageName, null)
         flags = Intent.FLAG_ACTIVITY_NEW_TASK
