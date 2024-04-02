@@ -64,7 +64,7 @@ fun GalleryScreen(navController: NavController, myViewModel: MapAppViewModel) {
             Text(text = "Abrir Galeria")
         }
         Image(
-            bitmap = bitmap!!.asImageBitmap(), contentDescription = null,
+            bitmap = if (bitmap!= null) bitmap!!.asImageBitmap() else img!!.asImageBitmap(), contentDescription = null,
             contentScale = ContentScale.Crop, modifier = Modifier.clip(RectangleShape)
                 .size(250.dp)
                 .background(Color.LightGray)

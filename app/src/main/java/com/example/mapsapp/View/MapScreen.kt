@@ -212,7 +212,7 @@ fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState, navController: 
                                 descripcionMarcador
                             )
                         }) {
-                            Text(text = "BOTON QUE AÑADE")
+                            Text(text = "AÑADIR MARCADOR")
                         }
 
 

@@ -97,7 +97,7 @@ fun CamaraScreen(navController: NavController, myViewModel: MapAppViewModel) {
     }
     Row(
         modifier = Modifier.fillMaxWidth()) {
-        IconButton(onClick = { navController.navigate(Routes.MapsScreen.route) }) {
+        IconButton(onClick = { navController.navigateUp() }) {
             Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = "ATRAS")
         }
     }
