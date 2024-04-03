@@ -341,10 +341,10 @@ fun Mapa(myViewModel: MapAppViewModel) {
             val marcadores by myViewModel.listaLocalizacion.observeAsState()
             marcadores?.forEach {
                 Marker(
-                    state = MarkerState(it.localizacion),
+                    state = MarkerState(LatLng(it.latitud, it.longitud)),
                     title = it.titulo,
                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE),
-                    snippet = it.descripcion
+                    snippet = it.descripcion,
                 )
             }
 

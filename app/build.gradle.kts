@@ -87,6 +87,8 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:1.3.2")
     implementation("androidx.camera:camera-view:1.3.2")
     implementation("androidx.camera:camera-extensions:1.3.2")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+
 
 //Icons
     implementation("androidx.compose.material:material-icons-extended:1.6.3")
