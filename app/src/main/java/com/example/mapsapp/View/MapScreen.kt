@@ -11,6 +11,7 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -211,6 +213,9 @@ fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState, navController: 
                                 tituloMarcador,
                                 descripcionMarcador
                             )
+                            myViewModel.esconderBottomSheet()
+
+
                         }) {
                             Text(text = "AÑADIR MARCADOR")
                         }
@@ -257,6 +262,15 @@ fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState, navController: 
                     }
                     if (showPermissionDenied) {
                         PermissionDeclinedScreen()
+                    }
+
+                    Box{
+                        if(myViewModel.fotoGroseraBip.value != null){
+                            Image(
+                                bitmap = myViewModel.fotoGroseraBip.value!!.asImageBitmap(),
+                                contentDescription = null
+                            )
+                        }
                     }
                 }
             }
@@ -317,7 +331,7 @@ fun Mapa(myViewModel: MapAppViewModel) {
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
-            properties = MapProperties(isBuildingEnabled = true, mapType = MapType.HYBRID),
+            properties = MapProperties(isBuildingEnabled = true, mapType = MapType.NORMAL),
             uiSettings = MapUiSettings(
                 compassEnabled = true,
                 mapToolbarEnabled = true,

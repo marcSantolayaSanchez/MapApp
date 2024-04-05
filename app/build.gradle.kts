@@ -88,6 +88,9 @@ dependencies {
     implementation("androidx.camera:camera-view:1.3.2")
     implementation("androidx.camera:camera-extensions:1.3.2")
     implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation ("com.google.firebase:firebase-storage-ktx")
+    implementation("com.github.bumptech.glide:compose:1.0.0-beta01")
+
 
 
 //Icons
