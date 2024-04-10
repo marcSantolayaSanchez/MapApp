@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
@@ -16,16 +17,16 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class MapAppViewModel : ViewModel(){
+class MapAppViewModel : ViewModel() {
     data class Info(
-        var markerId : String? = null,
-        var titulo : String,
-        var latitud : Double,
-        var longitud : Double,
-        var descripcion : String,
-        var imagen : String?,
-    ){
-        constructor() : this(null,"",0.0,0.0,"",null)
+        var markerId: String? = null,
+        var titulo: String,
+        var latitud: Double,
+        var longitud: Double,
+        var descripcion: String,
+        var imagen: String?,
+    ) {
+        constructor() : this(null, "", 0.0, 0.0, "", null)
     }
 
     val repository = Repository()
@@ -36,7 +37,7 @@ class MapAppViewModel : ViewModel(){
     private val _mostrarImagen = MutableLiveData(false)
     val mostrarImagen = _mostrarImagen
 
-    private val _geolocalizar = MutableLiveData(LatLng(0.0,0.0))
+    private val _geolocalizar = MutableLiveData(LatLng(0.0, 0.0))
     val geolocalizar = _geolocalizar
 
     private val _fotoGrosera = MutableLiveData<String>()
@@ -57,44 +58,104 @@ class MapAppViewModel : ViewModel(){
     private val _showPermissionDenied = MutableLiveData(false)
     val showPermissionDenied = _showPermissionDenied
 
-    fun showBottomSheet(latlng : LatLng){
-    _mostrarShowBottom.value = true
-    _geolocalizar.value = latlng
+    private val _userId = MutableLiveData<String>()
+    val userId = _userId
+
+    private val _loggedUser = MutableLiveData<String>()
+    val loggedUser = _loggedUser
+
+    private val auth = FirebaseAuth.getInstance()
+
+    private val _goToNext = MutableLiveData(false)
+    val goToNext = _goToNext
+    fun register(username: String, password: String) {
+        auth.createUserWithEmailAndPassword(username, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    _goToNext.value = true
+                } else {
+                    _goToNext.value = false
+                    Log.d("Error", "Error crating user : ${task.result}")
+                }
+            }
+    }
+
+    fun login(username: String?, password: String?) {
+        auth.signInWithEmailAndPassword(username!!, password!!)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    _userId.value = task.result.user?.uid
+                    _loggedUser.value = task.result.user?.email?.split("@")?.get(0)
+                    _goToNext.value = true
+                } else {
+                    _goToNext.value = false
+                    Log.d("Error", "Error signing in: ${task.result}")
+                }
+            }
+    }
+
+    fun logout() {
+        auth.signOut()
+    }
+
+
+    fun showBottomSheet(latlng: LatLng) {
+        _mostrarShowBottom.value = true
+        _geolocalizar.value = latlng
 
     }
-    fun guardarFoto(imagen: String){
+
+    fun guardarFoto(imagen: String) {
         _fotoGrosera.value = imagen
     }
 
-    fun esconderBottomSheet(){
+    fun esconderBottomSheet() {
         _mostrarShowBottom.value = false
     }
 
-    fun añadirItem(titulo : String, descripcion: String){
-        _listaLocalizacion.value?.add(Info(null,titulo, _geolocalizar.value!!.latitude, _geolocalizar.value!!.longitude,descripcion, fotoGrosera.value))
-        repository.addMarker(Info(null,titulo, _geolocalizar.value!!.latitude, _geolocalizar.value!!.longitude,descripcion, fotoGrosera.value))
+    fun añadirItem(titulo: String, descripcion: String) {
+        _listaLocalizacion.value?.add(
+            Info(
+                null,
+                titulo,
+                _geolocalizar.value!!.latitude,
+                _geolocalizar.value!!.longitude,
+                descripcion,
+                fotoGrosera.value
+            )
+        )
+        repository.addMarker(
+            Info(
+                null,
+                titulo,
+                _geolocalizar.value!!.latitude,
+                _geolocalizar.value!!.longitude,
+                descripcion,
+                fotoGrosera.value
+            )
+        )
     }
 
-    fun setCameraPermissionGranted(granted : Boolean){
+    fun setCameraPermissionGranted(granted: Boolean) {
         _cameraPermissionGranted.value = granted
     }
 
-    fun setShouldShowPermissionRationale(should: Boolean){
+    fun setShouldShowPermissionRationale(should: Boolean) {
         _shouldShowPermissionRationale.value = should
     }
 
-    fun setShowPermissionDenied(denied : Boolean){
+    fun setShowPermissionDenied(denied: Boolean) {
         _showPermissionDenied.value = denied
     }
 
     fun getMarkers() {
-        repository.getMarkers().addSnapshotListener{value,error ->
-            if (error != null){
+        repository.getMarkers().addSnapshotListener { value, error ->
+            if (error != null) {
                 Log.e("FireStore error", error.message.toString())
                 return@addSnapshotListener
             }
             val tempList = mutableListOf<Info>()
-            for (dc : DocumentChange in value?.documentChanges!!) {
+            for (dc: DocumentChange in value?.documentChanges!!) {
                 if (dc.type == DocumentChange.Type.ADDED) {
                     val newMarker = dc.document.toObject(Info::class.java)
                     newMarker.markerId = dc.document.id
@@ -104,7 +165,8 @@ class MapAppViewModel : ViewModel(){
             _listaLocalizacion.value = tempList
         }
     }
-    fun uploadImage(imageUri : Uri?){
+
+    fun uploadImage(imageUri: Uri?) {
         val formatter = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.getDefault())
         val now = Date()
         val fileName = formatter.format(now)
@@ -117,22 +179,22 @@ class MapAppViewModel : ViewModel(){
                         Log.i("IMAGEN", it.toString())
                     }
                 }
-                .addOnFailureListener(){
+                .addOnFailureListener() {
                     Log.i("IMAGE UPLOAD", "Image upload failed")
                 }
         }
     }
 
 
-    fun getMarker(markerId : String) {
-        repository.getMarker(markerId).addSnapshotListener{value, error ->
-            if (error != null){
+    fun getMarker(markerId: String) {
+        repository.getMarker(markerId).addSnapshotListener { value, error ->
+            if (error != null) {
                 Log.w("MarkerRepository", "Listen failed", error)
                 return@addSnapshotListener
             }
-            if(value != null && value.exists()) {
+            if (value != null && value.exists()) {
                 val marker = value.toObject(Info::class.java)
-                if(marker != null){
+                if (marker != null) {
                     marker.markerId = markerId
                 }
 
@@ -142,7 +204,7 @@ class MapAppViewModel : ViewModel(){
         }
     }
 
-    fun addMarker(info : Info){
+    fun addMarker(info: Info) {
         repository.addMarker(info)
     }
 

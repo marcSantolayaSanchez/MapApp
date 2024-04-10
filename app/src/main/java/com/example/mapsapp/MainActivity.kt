@@ -15,8 +15,10 @@ import androidx.navigation.compose.rememberNavController
 import com.example.mapsapp.Navigation.Routes
 import com.example.mapsapp.View.CamaraScreen
 import com.example.mapsapp.View.GalleryScreen
+import com.example.mapsapp.View.LoginScreen
 import com.example.mapsapp.View.MapScreen
 import com.example.mapsapp.View.MyDrawer
+import com.example.mapsapp.View.RegisterScreen
 import com.example.mapsapp.viewModel.MapAppViewModel
 
 class MainActivity : ComponentActivity() {
@@ -36,11 +38,13 @@ class MainActivity : ComponentActivity() {
                     MyDrawer(myViewModel = MapAppViewModel(), navigationController)
                     NavHost(
                         navController = navigationController,
-                        startDestination = Routes.MapsScreen.route
+                        startDestination = Routes.LoginScreen.route
                     ) {
                         composable(Routes.MapsScreen.route) { MapScreen(navController = navigationController) }
                         composable(Routes.CamaraScreen.route){CamaraScreen(navController = navigationController, myViewModel)}
                         composable(Routes.GalleryScreen.route){ GalleryScreen(navController = navigationController, myViewModel) }
+                        composable(Routes.RegisterScreen.route){ RegisterScreen(navController = navigationController, myViewModel) }
+                        composable(Routes.LoginScreen.route){LoginScreen(navController = navigationController, myViewModel)}
                     }
                 }
             }

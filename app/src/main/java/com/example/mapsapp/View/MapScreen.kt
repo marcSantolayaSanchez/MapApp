@@ -155,6 +155,7 @@ fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState, navController: 
                 Text("ayuda")
             }
             Mapa(myViewModel)
+            myViewModel.getMarkers()
             if (showBottomSheet) {
                 ModalBottomSheet(
                     onDismissRequest = {
