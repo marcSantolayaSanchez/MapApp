@@ -46,6 +46,9 @@ class MapAppViewModel : ViewModel() {
     private val _fotoGroseraBip = MutableLiveData<Bitmap?>()
     val fotoGroseraBip = _fotoGroseraBip
 
+    private val _fotoGroseraUri = MutableLiveData<Uri?>()
+    val fotoGroseraUri = _fotoGroseraUri
+
     private val _listaLocalizacion = MutableLiveData<MutableList<Info>>(mutableListOf())
     val listaLocalizacion = _listaLocalizacion
 
@@ -105,25 +108,16 @@ class MapAppViewModel : ViewModel() {
 
     }
 
-    fun guardarFoto(imagen: String) {
-        _fotoGrosera.value = imagen
+    fun guardarFoto(imagen: Bitmap?, imagenUri : Uri?) {
+        _fotoGroseraBip.value = imagen
+        _fotoGroseraUri.value = imagenUri
     }
 
     fun esconderBottomSheet() {
         _mostrarShowBottom.value = false
     }
 
-    fun añadirItem(titulo: String, descripcion: String) {
-        _listaLocalizacion.value?.add(
-            Info(
-                null,
-                titulo,
-                _geolocalizar.value!!.latitude,
-                _geolocalizar.value!!.longitude,
-                descripcion,
-                fotoGrosera.value
-            )
-        )
+    fun añadirItem(titulo: String, descripcion: String, imagen : String?){
         repository.addMarker(
             Info(
                 null,
@@ -131,7 +125,7 @@ class MapAppViewModel : ViewModel() {
                 _geolocalizar.value!!.latitude,
                 _geolocalizar.value!!.longitude,
                 descripcion,
-                fotoGrosera.value
+                imagen
             )
         )
     }
@@ -147,6 +141,8 @@ class MapAppViewModel : ViewModel() {
     fun setShowPermissionDenied(denied: Boolean) {
         _showPermissionDenied.value = denied
     }
+
+
 
     fun getMarkers() {
         repository.getMarkers().addSnapshotListener { value, error ->
@@ -166,7 +162,7 @@ class MapAppViewModel : ViewModel() {
         }
     }
 
-    fun uploadImage(imageUri: Uri?) {
+    fun uploadImage(imageUri: Uri?, titulo: String, descripcion: String) {
         val formatter = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.getDefault())
         val now = Date()
         val fileName = formatter.format(now)
@@ -177,6 +173,7 @@ class MapAppViewModel : ViewModel() {
                     Log.i("IMAGE UPLOAD", "Image uploaded succesfully")
                     storage.downloadUrl.addOnSuccessListener {
                         Log.i("IMAGEN", it.toString())
+                        añadirItem(titulo,descripcion,it.toString())
                     }
                 }
                 .addOnFailureListener() {

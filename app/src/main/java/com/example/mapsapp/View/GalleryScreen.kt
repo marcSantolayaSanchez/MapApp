@@ -88,10 +88,10 @@ fun GalleryScreen(navController: NavController, myViewModel: MapAppViewModel) {
         )
 
         Button(onClick = {
-            if (uri != null) myViewModel.uploadImage(uri);
+            if (uri != null) myViewModel.guardarFoto(bitmap,uri);
             navController.navigateUp()
         }) {
-            Text(text = "Upload image")
+            Text(text = "Selecciona imagen")
         }
         /**GlideImage(
         model = imageUrl,
