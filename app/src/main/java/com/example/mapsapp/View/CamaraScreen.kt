@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -31,7 +32,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -41,9 +44,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.Lifecycling
 import androidx.navigation.NavController
 import com.example.mapsapp.Navigation.Routes
+import com.example.mapsapp.R
 import com.example.mapsapp.viewModel.MapAppViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
@@ -51,9 +56,10 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 @SuppressLint("RememberReturnType")
 @Composable
 fun CamaraScreen(navController: NavController, myViewModel: MapAppViewModel) {
-
+    var uri: Uri? by remember { mutableStateOf(null) }
     val context = LocalContext.current
-
+    val img: Bitmap? = ContextCompat.getDrawable(context, R.drawable.empty_image)?.toBitmap()
+    var bitmap by remember { mutableStateOf(img) }
     val controller = remember {
         LifecycleCameraController(context).apply {
             CameraController.IMAGE_CAPTURE
@@ -88,7 +94,8 @@ fun CamaraScreen(navController: NavController, myViewModel: MapAppViewModel) {
         IconButton(onClick =
         {
             takePhoto(context, controller) { photo ->
-
+                if (uri != null) myViewModel.guardarFoto(bitmap,uri);
+                navController.navigateUp()
             }
         }) {
             Icon(imageVector = Icons.Default.PhotoCamera, contentDescription = "Take photo")

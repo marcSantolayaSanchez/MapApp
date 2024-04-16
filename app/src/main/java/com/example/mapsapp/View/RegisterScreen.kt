@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.mapsapp.Navigation.Routes
 import com.example.mapsapp.viewModel.MapAppViewModel
 
 @Composable
@@ -53,8 +54,8 @@ fun RegisterScreen(navController: NavController, myViewModel: MapAppViewModel) {
 
         Button(
             onClick = {
-
                 myViewModel.register(email, password)
+                navController.navigate(Routes.LoginScreen.route)
             },
             modifier = Modifier
                 .fillMaxWidth()

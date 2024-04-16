@@ -19,6 +19,7 @@ import java.util.Locale
 
 class MapAppViewModel : ViewModel() {
     data class Info(
+        var usurioId : String,
         var markerId: String? = null,
         var titulo: String,
         var latitud: Double,
@@ -26,7 +27,7 @@ class MapAppViewModel : ViewModel() {
         var descripcion: String,
         var imagen: String?,
     ) {
-        constructor() : this(null, "", 0.0, 0.0, "", null)
+        constructor() : this("",null, "", 0.0, 0.0, "", null)
     }
 
     val repository = Repository()
@@ -78,7 +79,7 @@ class MapAppViewModel : ViewModel() {
                     _goToNext.value = true
                 } else {
                     _goToNext.value = false
-                    Log.d("Error", "Error crating user : ${task.result}")
+
                 }
             }
     }
@@ -92,7 +93,7 @@ class MapAppViewModel : ViewModel() {
                     _goToNext.value = true
                 } else {
                     _goToNext.value = false
-                    Log.d("Error", "Error signing in: ${task.result}")
+
                 }
             }
     }
@@ -120,6 +121,7 @@ class MapAppViewModel : ViewModel() {
     fun añadirItem(titulo: String, descripcion: String, imagen : String?){
         repository.addMarker(
             Info(
+                userId.value!!,
                 null,
                 titulo,
                 _geolocalizar.value!!.latitude,
@@ -128,6 +130,7 @@ class MapAppViewModel : ViewModel() {
                 imagen
             )
         )
+        getMarkers()
     }
 
     fun setCameraPermissionGranted(granted: Boolean) {
@@ -145,7 +148,7 @@ class MapAppViewModel : ViewModel() {
 
 
     fun getMarkers() {
-        repository.getMarkers().addSnapshotListener { value, error ->
+        repository.getMarkers().whereEqualTo("uid",userId.value).addSnapshotListener { value, error ->
             if (error != null) {
                 Log.e("FireStore error", error.message.toString())
                 return@addSnapshotListener

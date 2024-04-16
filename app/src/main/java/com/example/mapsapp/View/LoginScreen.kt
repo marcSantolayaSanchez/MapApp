@@ -1,5 +1,6 @@
 package com.example.mapsapp.View
 
+import Model.UserPrefs
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,13 +13,16 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,6 +34,18 @@ import com.example.mapsapp.viewModel.MapAppViewModel
 fun LoginScreen(navController: NavController, myViewModel: MapAppViewModel) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+    val chequearLogin by myViewModel.goToNext.observeAsState(false)
+    if (chequearLogin){
+        navController.navigate(Routes.MapScreen.route)
+    }
+    val context = LocalContext.current
+    val userPrefs = UserPrefs(context)
+    val storedUserData = userPrefs.getUserData.collectAsState(initial = emptyList())
+
+    // if (storedUserData.value.isNotEmpty() && storedUserData.value[0] != ""
+       // && storedUserData.value[1] != ""){
+        //myViewModel.
+    //}
 
     Column(
         modifier = Modifier
@@ -60,6 +76,7 @@ fun LoginScreen(navController: NavController, myViewModel: MapAppViewModel) {
         Button(
             onClick = {
                 myViewModel.login(email,password)
+
             },
             modifier = Modifier
                 .fillMaxWidth()

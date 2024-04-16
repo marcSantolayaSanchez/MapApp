@@ -171,8 +171,15 @@ fun MapScreen(myViewModel: MapAppViewModel, state: DrawerState, navController: N
                     ) {
                         Button(onClick = {
                             myViewModel.esconderBottomSheet()
-                            myViewModel.uploadImage(imagenUri,tituloMarcador,descripcionMarcador,)
-
+                            if (imagenUri != null) {
+                                myViewModel.uploadImage(
+                                    imagenUri,
+                                    tituloMarcador,
+                                    descripcionMarcador,
+                                )
+                            } else{
+                                myViewModel.añadirItem(tituloMarcador,descripcionMarcador,null)
+                            }
 
                         }) {
                             Text(text = "AÑADIR MARCADOR")
@@ -300,6 +307,7 @@ fun Mapa(myViewModel: MapAppViewModel) {
             )
 
             val marcadores by myViewModel.listaLocalizacion.observeAsState()
+            myViewModel.getMarkers()
             marcadores?.forEach {
                 Marker(
                     state = MarkerState(LatLng(it.latitud, it.longitud)),

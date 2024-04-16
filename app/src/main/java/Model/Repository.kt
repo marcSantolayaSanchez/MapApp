@@ -12,6 +12,7 @@ class Repository {
         database.collection("markers")
             .add(
                 hashMapOf(
+                    "uid" to marker.usurioId,
                     "titulo" to marker.titulo,
                     "latitud" to marker.latitud,
                     "longitud" to marker.longitud,
