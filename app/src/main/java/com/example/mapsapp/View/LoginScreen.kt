@@ -1,8 +1,10 @@
 package com.example.mapsapp.View
 
 import Model.UserPrefs
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Checkbox
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
@@ -23,29 +26,41 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.mapsapp.Navigation.Routes
 import com.example.mapsapp.viewModel.MapAppViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun LoginScreen(navController: NavController, myViewModel: MapAppViewModel) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     val chequearLogin by myViewModel.goToNext.observeAsState(false)
+    var isPressed by rememberSaveable{ mutableStateOf(false)}
     if (chequearLogin){
         navController.navigate(Routes.MapScreen.route)
     }
     val context = LocalContext.current
     val userPrefs = UserPrefs(context)
     val storedUserData = userPrefs.getUserData.collectAsState(initial = emptyList())
+     if (storedUserData.value.isNotEmpty() && storedUserData.value[0] != ""
+        && storedUserData.value[1] != "" && storedUserData.value[2] != ""){
+        email = storedUserData.value[0]
+        password = storedUserData.value[1]
+        if (storedUserData.value[2] == "true"){
+            myViewModel.login(storedUserData.value[0], storedUserData.value[1])
+        }
 
-    // if (storedUserData.value.isNotEmpty() && storedUserData.value[0] != ""
-       // && storedUserData.value[1] != ""){
-        //myViewModel.
-    //}
+    }
+
 
     Column(
         modifier = Modifier
@@ -72,10 +87,23 @@ fun LoginScreen(navController: NavController, myViewModel: MapAppViewModel) {
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         )
+        Row (modifier = Modifier .padding(20.dp), horizontalArrangement = Arrangement.SpaceBetween){
+            Checkbox(checked = isPressed , onCheckedChange = {isPressed = it})
+            Text(text = "Guardar datos", style = TextStyle(fontSize = 25.sp, fontStyle = FontStyle.Italic))
+        }
+        
 
         Button(
             onClick = {
                 myViewModel.login(email,password)
+                if (isPressed){
+                    CoroutineScope(Dispatchers.IO).launch{
+                        userPrefs.saveUserData(email,password, "true")
+                    }
+                } else{
+                    CoroutineScope(Dispatchers.IO).launch{
+                        userPrefs.saveUserData("","", "false")
+                }}
 
             },
             modifier = Modifier
@@ -100,20 +128,6 @@ fun LoginScreen(navController: NavController, myViewModel: MapAppViewModel) {
             shape = RoundedCornerShape(16.dp)
         ) {
             Text(text = "Registrate!", fontSize = 18.sp)
-        }
-
-        Button(
-            onClick = {
-                navController.navigate(Routes.MapScreen.route)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp)
-                .height(50.dp),
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue, contentColor = Color.White),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Text(text = "Mapa", fontSize = 18.sp)
         }
     }
 }

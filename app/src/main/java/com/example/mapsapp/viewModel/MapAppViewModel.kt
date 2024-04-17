@@ -1,6 +1,7 @@
 package com.example.mapsapp.viewModel
 
 import Model.Repository
+import Model.UserPrefs
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
@@ -100,6 +101,7 @@ class MapAppViewModel : ViewModel() {
 
     fun logout() {
         auth.signOut()
+        _goToNext.value = false
     }
 
 
