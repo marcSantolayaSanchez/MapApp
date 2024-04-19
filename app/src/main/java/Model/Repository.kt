@@ -34,7 +34,7 @@ class Repository {
     }
 
     fun deleteMarker(markerID : String){
-        database.collection("users").document(markerID).delete()
+        database.collection("markers").document(markerID).delete()
     }
 
     fun getMarkers() : CollectionReference {
@@ -42,7 +42,7 @@ class Repository {
     }
 
     fun getMarker(userMarker : String) : DocumentReference{
-        return database.collection("marker").document(userMarker)
+        return database.collection("markers").document(userMarker)
     }
 
 

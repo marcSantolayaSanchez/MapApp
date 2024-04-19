@@ -210,4 +210,9 @@ class MapAppViewModel : ViewModel() {
         repository.addMarker(info)
     }
 
+    fun deleteMarker(markerId: Info){
+        repository.deleteMarker(markerId.markerId!!)
+            getMarkers()
+    }
+
 }

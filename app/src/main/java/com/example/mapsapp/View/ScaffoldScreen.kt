@@ -70,6 +70,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -113,16 +114,17 @@ fun MyDrawer(myViewModel: MapAppViewModel) {
     ModalNavigationDrawer(drawerState = state, gesturesEnabled = false, drawerContent = {
         ModalDrawerSheet {
             Row() {
-                IconButton(onClick = { scope.launch { state.close() } }) {
+                IconButton(onClick = { scope.launch { state.close()}}) {
                     Icon(imageVector = Icons.Filled.Close, contentDescription = "Close")
                 }
                 Text("Marcadores", modifier = Modifier.padding(12.dp))
                 HorizontalDivider()
             }
             NavigationDrawerItem(
-                label = { Text(text = "Marcador 1") }, selected = false, onClick = {
+                label = { Text(text = "Marcadores Guardados") }, selected = false, onClick = {
                     scope.launch {
                         state.close()
+                        navigationController.navigate(Routes.MarcadoresGuardados.route)
                     }
                 })
             Spacer(modifier = Modifier.weight(1F))
@@ -188,6 +190,15 @@ fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState, navController: 
                 myViewModel
             )
         }
+
+        composable(Routes.MarcadoresGuardados.route) {
+            MarcadoresGuardados(
+                navController = navController,
+                myViewModel
+            )
+        }
+
+
     }
 
 }
