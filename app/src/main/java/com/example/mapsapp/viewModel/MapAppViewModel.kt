@@ -20,16 +20,18 @@ import java.util.Locale
 
 class MapAppViewModel : ViewModel() {
     data class Info(
-        var usurioId : String,
+        var usurioId: String,
         var markerId: String? = null,
         var titulo: String,
         var latitud: Double,
         var longitud: Double,
         var descripcion: String,
         var imagen: String?,
+        var categoria: String?
     ) {
-        constructor() : this("",null, "", 0.0, 0.0, "", null)
+        constructor() : this("", null, "", 0.0, 0.0, "", null, null)
     }
+
 
     val repository = Repository()
 
@@ -120,7 +122,7 @@ class MapAppViewModel : ViewModel() {
         _mostrarShowBottom.value = false
     }
 
-    fun añadirItem(titulo: String, descripcion: String, imagen : String?){
+    fun añadirItem(titulo: String, descripcion: String, imagen : String?, categoria: String?){
         repository.addMarker(
             Info(
                 userId.value!!,
@@ -129,7 +131,8 @@ class MapAppViewModel : ViewModel() {
                 _geolocalizar.value!!.latitude,
                 _geolocalizar.value!!.longitude,
                 descripcion,
-                imagen
+                imagen,
+                categoria
             )
         )
         getMarkers()
@@ -167,7 +170,7 @@ class MapAppViewModel : ViewModel() {
         }
     }
 
-    fun uploadImage(imageUri: Uri?, titulo: String, descripcion: String) {
+    fun uploadImage(imageUri: Uri?, titulo: String, descripcion: String, categoria: String?) {
         val formatter = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.getDefault())
         val now = Date()
         val fileName = formatter.format(now)
@@ -178,7 +181,7 @@ class MapAppViewModel : ViewModel() {
                     Log.i("IMAGE UPLOAD", "Image uploaded succesfully")
                     storage.downloadUrl.addOnSuccessListener {
                         Log.i("IMAGEN", it.toString())
-                        añadirItem(titulo,descripcion,it.toString())
+                        añadirItem(titulo,descripcion,it.toString(), categoria)
                     }
                 }
                 .addOnFailureListener() {

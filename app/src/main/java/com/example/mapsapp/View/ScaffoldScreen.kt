@@ -155,10 +155,6 @@ fun MyDrawer(myViewModel: MapAppViewModel) {
 }
 
 
-@OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class,
-    ExperimentalPermissionsApi::class
-)
 @Composable
 fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState, navController: NavHostController) {
     NavHost(

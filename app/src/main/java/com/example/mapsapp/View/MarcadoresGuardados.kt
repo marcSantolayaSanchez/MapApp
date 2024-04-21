@@ -22,6 +22,7 @@ import androidx.compose.material.IconButton
 
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Card
@@ -60,7 +61,7 @@ fun MarcadoresGuardados(navController: NavController, myViewModel: MapAppViewMod
     val marcadores by myViewModel.listaLocalizacion.observeAsState()
 
 
-    Scaffold(topBar = { ToppAppBar(myViewModel = MapAppViewModel(), state) }){ paddingValues ->
+    Scaffold(topBar = { ToppAppBar(myViewModel = MapAppViewModel(), state, navController) }){ paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxHeight()
@@ -135,11 +136,26 @@ fun MarcadorItem(marcador : MapAppViewModel.Info, myViewModel: MapAppViewModel) 
                     textAlign = TextAlign.Left,
                     modifier = Modifier
                         .fillMaxSize()
-
                 )
+            }
 
+            Row(modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()) {
+                marcador.categoria?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFB7CBF4),
+                            fontSize = 20.sp
 
-
+                        ),
+                        textAlign = TextAlign.Left,
+                        modifier = Modifier
+                            .fillMaxSize()
+                    )
+                }
             }
             IconButton(onClick = {myViewModel.deleteMarker(marcador)}) {
                 Icon(imageVector = Icons.Filled.Close, contentDescription = "Close", tint = Color.Cyan)
@@ -150,13 +166,13 @@ fun MarcadorItem(marcador : MapAppViewModel.Info, myViewModel: MapAppViewModel) 
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ToppAppBar(myViewModel: MapAppViewModel, state: DrawerState) {
+fun ToppAppBar(myViewModel: MapAppViewModel, state: DrawerState, navController: NavController) {
     val scope = rememberCoroutineScope()
     TopAppBar(
-        title = { androidx.compose.material3.Text(text = "Mapa") },
+        title = { androidx.compose.material3.Text(text = "Marcadores") },
         navigationIcon = {
-            androidx.compose.material3.IconButton(onClick = { scope.launch { state.open() } }) {
-                Icon(imageVector = Icons.Filled.Menu, contentDescription = "Menu")
+            androidx.compose.material3.IconButton(onClick = { navController.navigateUp() }) {
+                Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = "ATRAS")
             }
         }
     )
