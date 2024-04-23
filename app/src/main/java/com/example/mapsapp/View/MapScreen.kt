@@ -90,15 +90,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun MapScreen(myViewModel: MapAppViewModel, state: DrawerState, navController: NavHostController) {
     val isCameraPermissionGranted by myViewModel.cameraPermissionGranted.observeAsState(false)
-    val shouldShowPermissionRationale by myViewModel.shouldShowPermissionRationale.observeAsState(
-        false
-    )
     val imagen by myViewModel.fotoGroseraBip.observeAsState(null)
     val imagenUri by myViewModel.fotoGroseraUri.observeAsState(null)
     val showPermissionDenied by myViewModel.showPermissionDenied.observeAsState(false)
-    val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(true)
-    val scope = rememberCoroutineScope()
     var tituloMarcador by rememberSaveable {
         mutableStateOf("")
     }
@@ -108,7 +103,6 @@ fun MapScreen(myViewModel: MapAppViewModel, state: DrawerState, navController: N
     var categoriaMarcador by rememberSaveable {
         mutableStateOf("")
     }
-    val categorias = listOf("Cafetería", "Hotel", "Tienda", "Restaurante", "Museo", "Parque")
 
     val showBottomSheet by myViewModel.mostrarShowBottom.observeAsState(false)
     Scaffold(
@@ -258,7 +252,7 @@ fun MapScreen(myViewModel: MapAppViewModel, state: DrawerState, navController: N
                             LazyRow(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                items(categorias) { categoria ->
+                                items(myViewModel.categorias) { categoria ->
                                     Text(
                                         text = categoria,
                                         modifier = Modifier

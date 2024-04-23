@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.items
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.IconButton
 
 import androidx.compose.material.Text
@@ -25,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -37,7 +40,10 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,16 +65,30 @@ fun MarcadoresGuardados(navController: NavController, myViewModel: MapAppViewMod
     val state: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     Text(text = "Marcadores Guardados")
     val marcadores by myViewModel.listaLocalizacion.observeAsState()
+    val categorias by myViewModel.categoriaSeleccionada.observeAsState()
+
+    if (categorias != "All"){
+        myViewModel.getMarkersFILTRADO(categorias)
+    } else{
+        myViewModel.getMarkers()
+    }
+
+    Scaffold(topBar = {
+        ToppAppBar(
+            myViewModel = MapAppViewModel(),
+            state,
+            navController
+        )
+    }) { paddingValues ->
 
 
-    Scaffold(topBar = { ToppAppBar(myViewModel = MapAppViewModel(), state, navController) }){ paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxHeight()
                 .padding(paddingValues)
-        ){
+        ) {
             LazyColumn {
-                items(marcadores!!){
+                items(marcadores!!) {
                     MarcadorItem(marcador = it, myViewModel)
                 }
             }
@@ -78,7 +98,7 @@ fun MarcadoresGuardados(navController: NavController, myViewModel: MapAppViewMod
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun MarcadorItem(marcador : MapAppViewModel.Info, myViewModel: MapAppViewModel) {
+fun MarcadorItem(marcador: MapAppViewModel.Info, myViewModel: MapAppViewModel) {
     Card(
         border = BorderStroke(4.dp, color = Color(0xFF152935)),
         shape = RoundedCornerShape(10.dp),
@@ -86,16 +106,20 @@ fun MarcadorItem(marcador : MapAppViewModel.Info, myViewModel: MapAppViewModel) 
             .clickable { }
             .background(color = Color(0xFF2A4165))
 
-    ){
-        Column(horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier
                 .padding(top = 5.dp)
                 .fillMaxHeight()
-                .background(color = Color(0xFF2A4165))) {
-            Row(modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()){
+                .background(color = Color(0xFF2A4165))
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
                 GlideImage(
                     model = marcador.imagen,
                     contentDescription = "33",
@@ -116,15 +140,17 @@ fun MarcadorItem(marcador : MapAppViewModel.Info, myViewModel: MapAppViewModel) 
                         .padding(top = 0.dp)
                 )
 
-                    Divider(
-                        color = Color.Black, modifier = Modifier
-                            .fillMaxWidth()
-                            .height(8.dp)
-                    )
-                }
-            Row(modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()) {
+                Divider(
+                    color = Color.Black, modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
                 Text(
                     text = marcador.descripcion,
                     style = MaterialTheme.typography.bodyLarge.copy(
@@ -139,9 +165,11 @@ fun MarcadorItem(marcador : MapAppViewModel.Info, myViewModel: MapAppViewModel) 
                 )
             }
 
-            Row(modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
                 marcador.categoria?.let {
                     Text(
                         text = it,
@@ -157,22 +185,65 @@ fun MarcadorItem(marcador : MapAppViewModel.Info, myViewModel: MapAppViewModel) 
                     )
                 }
             }
-            IconButton(onClick = {myViewModel.deleteMarker(marcador)}) {
-                Icon(imageVector = Icons.Filled.Close, contentDescription = "Close", tint = Color.Cyan)
+            IconButton(onClick = { myViewModel.deleteMarker(marcador) }) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = "Close",
+                    tint = Color.Cyan
+                )
             }
 
         }
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ToppAppBar(myViewModel: MapAppViewModel, state: DrawerState, navController: NavController) {
-    val scope = rememberCoroutineScope()
+fun ToppAppBar(
+    myViewModel: MapAppViewModel,
+    state: DrawerState,
+    navController: NavController
+) {
+
+    var expanded by remember { mutableStateOf(false) }
+    var selectedText by remember { mutableStateOf("") }
+    val categorias =  listOf("All","Cafetería", "Hotel", "Tienda", "Restaurante", "Museo", "Parque")
+
+
     TopAppBar(
-        title = { androidx.compose.material3.Text(text = "Marcadores") },
+        title = { Text(text = "Marcadores") },
         navigationIcon = {
-            androidx.compose.material3.IconButton(onClick = { navController.navigateUp() }) {
-                Icon(imageVector = Icons.Default.ArrowBackIosNew, contentDescription = "ATRAS")
+            IconButton(onClick = { navController.navigateUp() }) {
+                Icon(Icons.Default.ArrowBackIosNew, contentDescription = "ATRAS")
+            }
+        },
+        actions = {
+
+            Column {
+                IconButton(
+                    onClick = { expanded = !expanded },
+                    content = {
+                        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+                    }
+                )
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    categorias.forEach { item ->
+
+                        DropdownMenuItem(
+                            onClick = {
+                                selectedText = item
+                                expanded = false
+                                myViewModel.modificarCategoria(selectedText)
+                                println(selectedText)
+                            }
+                        ) {
+                            Text(text = item)
+                        }
+                    }
+                }
             }
         }
     )

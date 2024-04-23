@@ -34,7 +34,7 @@ class MapAppViewModel : ViewModel() {
 
 
     val repository = Repository()
-
+    val categorias =  listOf("Cafetería", "Hotel", "Tienda", "Restaurante", "Museo", "Parque")
     private val _mostrarShowBottom = MutableLiveData(false)
     val mostrarShowBottom = _mostrarShowBottom
 
@@ -43,6 +43,9 @@ class MapAppViewModel : ViewModel() {
 
     private val _geolocalizar = MutableLiveData(LatLng(0.0, 0.0))
     val geolocalizar = _geolocalizar
+
+    private val _categoriaSeleccionada = MutableLiveData("All")
+    val categoriaSeleccionada = _categoriaSeleccionada
 
     private val _fotoGrosera = MutableLiveData<String>()
     val fotoGrosera = _fotoGrosera
@@ -122,6 +125,10 @@ class MapAppViewModel : ViewModel() {
         _mostrarShowBottom.value = false
     }
 
+    fun modificarCategoria(categoria : String) {
+       _categoriaSeleccionada.value = categoria
+        getMarkersFILTRADO(categoria)
+    }
     fun añadirItem(titulo: String, descripcion: String, imagen : String?, categoria: String?){
         repository.addMarker(
             Info(
@@ -154,6 +161,24 @@ class MapAppViewModel : ViewModel() {
 
     fun getMarkers() {
         repository.getMarkers().whereEqualTo("uid",userId.value).addSnapshotListener { value, error ->
+            if (error != null) {
+                Log.e("FireStore error", error.message.toString())
+                return@addSnapshotListener
+            }
+            val tempList = mutableListOf<Info>()
+            for (dc: DocumentChange in value?.documentChanges!!) {
+                if (dc.type == DocumentChange.Type.ADDED) {
+                    val newMarker = dc.document.toObject(Info::class.java)
+                    newMarker.markerId = dc.document.id
+                    tempList.add(newMarker)
+                }
+            }
+            _listaLocalizacion.value = tempList
+        }
+    }
+
+    fun getMarkersFILTRADO(categoria: String?) {
+        repository.getMarkers().whereEqualTo("uid",userId.value).whereEqualTo("categoria", categoria).addSnapshotListener { value, error ->
             if (error != null) {
                 Log.e("FireStore error", error.message.toString())
                 return@addSnapshotListener
