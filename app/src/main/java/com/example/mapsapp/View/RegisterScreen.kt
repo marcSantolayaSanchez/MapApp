@@ -1,5 +1,6 @@
 package com.example.mapsapp.View
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -25,6 +27,7 @@ import com.example.mapsapp.viewModel.MapAppViewModel
 fun RegisterScreen(navController: NavController, myViewModel: MapAppViewModel) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -54,9 +57,14 @@ fun RegisterScreen(navController: NavController, myViewModel: MapAppViewModel) {
 
         Button(
             onClick = {
+                if (email.isBlank() || password.isBlank()) {
+                    Toast.makeText(context, "Pon todos los campos.", Toast.LENGTH_SHORT).show()
+                } else if (!email.endsWith("@gmail.com")) {
+                    Toast.makeText(context, "Tiene que ser correo que termine en @gmail.com.", Toast.LENGTH_SHORT).show()
+                } else {
                 myViewModel.register(email, password)
                 navController.navigate(Routes.LoginScreen.route)
-            },
+            }},
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)

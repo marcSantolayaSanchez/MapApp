@@ -11,4 +11,6 @@ sealed class Routes(val route: String) {
     object LoginScreen : Routes("login_screen")
 
     object MarcadoresGuardados : Routes("marcadores_screen")
+
+    object DescripcionScreen : Routes("descripcion_screen")
 }

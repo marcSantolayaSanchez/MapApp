@@ -38,6 +38,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -57,30 +58,34 @@ import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.example.mapsapp.Navigation.Routes
 import com.example.mapsapp.viewModel.MapAppViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun MarcadoresGuardados(navController: NavController, myViewModel: MapAppViewModel) {
     val state: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    Text(text = "Marcadores Guardados")
+
+
     val marcadores by myViewModel.listaLocalizacion.observeAsState()
     val categorias by myViewModel.categoriaSeleccionada.observeAsState()
 
-    if (categorias != "All"){
-        myViewModel.getMarkersFILTRADO(categorias)
-    } else{
-        myViewModel.getMarkers()
+
+    LaunchedEffect(categorias) {
+        if (categorias != "All") {
+            myViewModel.getMarkersFILTRADO(categorias)
+        } else {
+            myViewModel.getMarkers()
+        }
     }
 
     Scaffold(topBar = {
         ToppAppBar(
-            myViewModel = MapAppViewModel(),
+            myViewModel = myViewModel,
             state,
             navController
         )
     }) { paddingValues ->
-
 
         Box(
             modifier = Modifier
@@ -88,8 +93,8 @@ fun MarcadoresGuardados(navController: NavController, myViewModel: MapAppViewMod
                 .padding(paddingValues)
         ) {
             LazyColumn {
-                items(marcadores!!) {
-                    MarcadorItem(marcador = it, myViewModel)
+                items(marcadores ?: emptyList()) { marcador ->
+                    MarcadorItem(marcador = marcador, myViewModel = myViewModel, navController = navController)
                 }
             }
         }
@@ -98,12 +103,12 @@ fun MarcadoresGuardados(navController: NavController, myViewModel: MapAppViewMod
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun MarcadorItem(marcador: MapAppViewModel.Info, myViewModel: MapAppViewModel) {
+fun MarcadorItem(marcador: MapAppViewModel.Info, myViewModel: MapAppViewModel, navController: NavController) {
     Card(
         border = BorderStroke(4.dp, color = Color(0xFF152935)),
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
-            .clickable { }
+            .clickable {navController.navigate(Routes.DescripcionScreen.route) }
             .background(color = Color(0xFF2A4165))
 
     ) {
@@ -237,7 +242,6 @@ fun ToppAppBar(
                                 selectedText = item
                                 expanded = false
                                 myViewModel.modificarCategoria(selectedText)
-                                println(selectedText)
                             }
                         ) {
                             Text(text = item)

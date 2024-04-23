@@ -2,6 +2,7 @@ package com.example.mapsapp.View
 
 import Model.UserPrefs
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -95,15 +96,22 @@ fun LoginScreen(navController: NavController, myViewModel: MapAppViewModel) {
 
         Button(
             onClick = {
-                myViewModel.login(email,password)
-                if (isPressed){
-                    CoroutineScope(Dispatchers.IO).launch{
-                        userPrefs.saveUserData(email,password, "true")
+                if (email.isBlank() || password.isBlank()) {
+                    Toast.makeText(context, "Pon todos los campos.", Toast.LENGTH_SHORT).show()
+                } else if (!email.endsWith("@gmail.com")) {
+                    Toast.makeText(context, "Tiene que ser correo que termine en @gmail.com.", Toast.LENGTH_SHORT).show()
+                } else {
+                    myViewModel.login(email, password)
+                    if (isPressed) {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            userPrefs.saveUserData(email, password, "true")
+                        }
+                    } else {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            userPrefs.saveUserData("", "", "false")
+                        }
                     }
-                } else{
-                    CoroutineScope(Dispatchers.IO).launch{
-                        userPrefs.saveUserData("","", "false")
-                }}
+                }
 
             },
             modifier = Modifier
