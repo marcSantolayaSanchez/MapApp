@@ -77,25 +77,10 @@ import com.example.mapsapp.viewModel.MapAppViewModel
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MarcadoresGuardados(navController: NavController, myViewModel: MapAppViewModel) {
     val state: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val showPermissionDenied by myViewModel.showPermissionDenied.observeAsState(false)
-    val sheetState = rememberModalBottomSheetState(true)
-    var tituloMarcador by rememberSaveable {
-        mutableStateOf("")
-    }
-    var descripcionMarcador by rememberSaveable {
-        mutableStateOf("")
-    }
-    var categoriaMarcador by rememberSaveable {
-        mutableStateOf("")
-    }
-    val isCameraPermissionGranted by myViewModel.cameraPermissionGranted.observeAsState(false)
-    val imagen by myViewModel.fotoGroseraBip.observeAsState(null)
-    val imagenUri by myViewModel.fotoGroseraUri.observeAsState(null)
-    val showBottomSheet by myViewModel.mostrarShowBottom.observeAsState(false)
+
     val marcadores by myViewModel.listaLocalizacion.observeAsState()
     val categorias by myViewModel.categoriaSeleccionada.observeAsState()
 
@@ -132,186 +117,6 @@ fun MarcadoresGuardados(navController: NavController, myViewModel: MapAppViewMod
             }
         }
 
-        if (showBottomSheet) {
-            ModalBottomSheet(
-                sheetState = sheetState,
-                content = {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-
-                        OutlinedTextField(
-                            value = tituloMarcador,
-                            onValueChange = { tituloMarcador = it },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 10.dp),
-                            singleLine = true,
-                            placeholder = {
-                                androidx.compose.material3.Text(
-                                    text = "Nombre del Marcador",
-                                    color = Color.Gray,
-                                    modifier = Modifier.alpha(0.5f)
-                                )
-                            },
-                            shape = RoundedCornerShape(16.dp)
-                        )
-
-                        OutlinedTextField(
-                            value = descripcionMarcador,
-                            onValueChange = { descripcionMarcador = it },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            placeholder = {
-                                androidx.compose.material3.Text(
-                                    text = "Descripción",
-                                    color = Color.Gray,
-                                    modifier = Modifier.alpha(0.5f)
-                                )
-                            },
-                            shape = RoundedCornerShape(16.dp)
-                        )
-
-
-                        imagen?.let { bitmap ->
-                            Image(
-                                bitmap = bitmap.asImageBitmap(),
-                                contentDescription = "Imagen",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(1f)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .padding(top = 10.dp),
-                                contentScale = ContentScale.Crop
-                            )
-                        }
-
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            Button(
-                                onClick = {
-                                    myViewModel.esconderBottomSheet()
-                                    if (imagenUri != null) {
-                                        myViewModel.uploadImage(
-                                            imagenUri,
-                                            tituloMarcador,
-                                            descripcionMarcador,
-                                            categoriaMarcador
-                                        )
-                                    } else {
-                                        myViewModel.editMarker(
-                                            tituloMarcador,
-                                            descripcionMarcador,
-                                            null,
-                                            categoriaMarcador,
-                                            marker
-                                        )
-                                    }
-                                },
-                                modifier = Modifier
-                                    .height(50.dp)
-                                    .wrapContentWidth(),
-                                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue),
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                androidx.compose.material3.Text(
-                                    text = "AÑADIR MARCADOR",
-                                    color = Color.White,
-                                    fontSize = 18.sp
-                                )
-                            }
-
-                            Button(
-                                onClick = {
-                                    if (!isCameraPermissionGranted) {
-                                        navController.navigate(Routes.CamaraScreen.route)
-                                    }
-                                }, modifier = Modifier
-                                    .height(50.dp)
-                                    .wrapContentWidth()
-                                    .padding(horizontal = 16.dp),
-                                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue),
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                androidx.compose.material3.Text(
-                                    text = "HAZ FOTO",
-                                    color = Color.White,
-                                    fontSize = 18.sp
-                                )
-                            }
-
-
-                        }
-                        androidx.compose.material3.Text(
-                            text = "CATEGORIA MARCADOR:",
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
-
-                        LazyRow(
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            items(myViewModel.categorias) { categoria ->
-                                androidx.compose.material3.Text(
-                                    text = categoria,
-                                    modifier = Modifier
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                                        .background(
-                                            color = if (categoria == categoriaMarcador) Color.Gray else Color.Transparent,
-                                            shape = RoundedCornerShape(16.dp)
-                                        )
-                                        .clickable {
-                                            categoriaMarcador = categoria
-                                        }
-                                )
-                            }
-                        }
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            Button(
-                                onClick = {
-                                    if (!isCameraPermissionGranted) {
-                                        navController.navigate(Routes.GalleryScreen.route)
-                                    }
-                                },
-                                modifier = Modifier
-                                    .height(50.dp)
-                                    .wrapContentWidth()
-                                    .padding(horizontal = 16.dp),
-                                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Blue),
-                                shape = RoundedCornerShape(16.dp)
-                            ) {
-                                androidx.compose.material3.Text(
-                                    text = "GALERÍA",
-                                    color = Color.White,
-                                    fontSize = 18.sp
-                                )
-                            }
-                        }
-
-
-                        if (showPermissionDenied) {
-                            PermissionDeclinedScreen()
-                        }
-                    }
-                },
-                onDismissRequest = {
-                    myViewModel.esconderBottomSheet()
-                }
-            )
-        }
     }
 }
 
@@ -413,11 +218,7 @@ fun MarcadorItem(
                     )
                 }
             }
-            Row(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-            ) {
+
                 IconButton(onClick = { myViewModel.deleteMarker(marcador) }) {
                     Icon(
                         imageVector = Icons.Filled.Close,
@@ -425,16 +226,6 @@ fun MarcadorItem(
                         tint = Color.Cyan
                     )
                 }
-
-                IconButton(onClick = { myViewModel.showBottomSheet(latlng = LatLng(marcador.latitud, marcador.longitud)) }) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = "Close",
-                        tint = Color.Cyan
-                    )
-                }
-
-            }
         }
     }
 }

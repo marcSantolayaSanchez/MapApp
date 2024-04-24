@@ -3,9 +3,12 @@ package com.example.mapsapp.View
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.net.Uri
+import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -51,6 +54,7 @@ import com.example.mapsapp.Navigation.Routes
 import com.example.mapsapp.R
 import com.example.mapsapp.viewModel.MapAppViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import java.io.OutputStream
 
 
 @SuppressLint("RememberReturnType")
@@ -58,8 +62,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 fun CamaraScreen(navController: NavController, myViewModel: MapAppViewModel) {
     var uri: Uri? by remember { mutableStateOf(null) }
     val context = LocalContext.current
-    val img: Bitmap? = ContextCompat.getDrawable(context, R.drawable.empty_image)?.toBitmap()
-    var bitmap by remember { mutableStateOf(img) }
     val controller = remember {
         LifecycleCameraController(context).apply {
             CameraController.IMAGE_CAPTURE
@@ -94,7 +96,8 @@ fun CamaraScreen(navController: NavController, myViewModel: MapAppViewModel) {
         IconButton(onClick =
         {
             takePhoto(context, controller) { photo ->
-                if (uri != null) myViewModel.guardarFoto(bitmap,uri);
+                uri = bitmapToUri(context, photo)
+                if (uri != null) myViewModel.guardarFoto(photo,uri);
                 navController.navigateUp()
             }
         }) {
@@ -120,7 +123,19 @@ private fun takePhoto(
         object : OnImageCapturedCallback() {
             override fun onCaptureSuccess(image: ImageProxy) {
                 super.onCaptureSuccess(image)
-                onPhotoTaken(image.toBitmap())
+                val matrix = Matrix().apply {
+                    postRotate(image.imageInfo.rotationDegrees.toFloat())
+                }
+                val rotatedBitmap = Bitmap.createBitmap(
+                    image.toBitmap(),
+                    0,
+                    0,
+                    image.width,
+                    image.height,
+                    matrix,
+                    true
+                )
+                onPhotoTaken(rotatedBitmap)
             }
 
             override fun onError(exception: ImageCaptureException) {
@@ -144,4 +159,23 @@ fun CameraPreview(
             }
         }, modifier = modifier
     )
+}
+
+fun bitmapToUri(context: Context, bitmap: Bitmap): Uri? {
+    val filename = "${System.currentTimeMillis()}.jpg"
+    val values = ContentValues().apply {
+        put(MediaStore.Images.Media.TITLE, filename)
+        put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+        put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+        put(MediaStore.Images.Media.DATE_ADDED, System.currentTimeMillis())
+        put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis())
+    }
+
+    val uri: Uri? = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+    uri?.let {
+        val outstream: OutputStream? = context.contentResolver.openOutputStream(it)
+        outstream?.let { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it) }
+        outstream?.close()
+    }
+    return uri
 }
