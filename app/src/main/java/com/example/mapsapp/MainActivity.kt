@@ -27,14 +27,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val myViewModel by viewModels<MapAppViewModel>()
-            val marcador by viewModels<MapAppViewModel>(MapAppViewModel.Info)
+
             MapsAppTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MyDrawer(myViewModel = MapAppViewModel(), marcador = MapAppViewModel )
+                    MyDrawer(myViewModel = MapAppViewModel())
                 }
             }
         }

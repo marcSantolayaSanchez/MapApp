@@ -100,7 +100,7 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun MyDrawer(myViewModel: MapAppViewModel, marcador : MapAppViewModel.Info) {
+fun MyDrawer(myViewModel: MapAppViewModel) {
     val navigationController = rememberNavController()
     val scope = rememberCoroutineScope()
     val state: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -145,14 +145,14 @@ fun MyDrawer(myViewModel: MapAppViewModel, marcador : MapAppViewModel.Info) {
 
         }
     }) {
-        miScaffold(myViewModel, state, navController = navigationController, marcador)
+        miScaffold(myViewModel, state, navController = navigationController)
 
     }
 }
 
 
 @Composable
-fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState, navController: NavHostController,marcador : MapAppViewModel.Info ) {
+fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState, navController: NavHostController) {
     NavHost(
         navController = navController,
         startDestination = Routes.LoginScreen.route
@@ -193,7 +193,7 @@ fun miScaffold(myViewModel: MapAppViewModel, state: DrawerState, navController: 
         composable(Routes.DescripcionScreen.route) {
             DescripcionScreen(
                 myViewModel,
-                marcador
+                navController = navController
             )
         }
 

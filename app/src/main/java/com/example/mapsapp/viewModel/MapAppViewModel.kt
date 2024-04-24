@@ -78,6 +78,10 @@ class MapAppViewModel : ViewModel() {
 
     private val _goToNext = MutableLiveData(false)
     val goToNext = _goToNext
+
+    private val _marcadorActual = MutableLiveData<Info>()
+    val marcadorActual = _marcadorActual
+
     fun register(username: String, password: String) {
         auth.createUserWithEmailAndPassword(username, password)
             .addOnCompleteListener { task ->
@@ -227,11 +231,10 @@ class MapAppViewModel : ViewModel() {
                 if (marker != null) {
                     marker.markerId = markerId
                 }
-
-            } else {
-                Log.d("MarkerRepository", "Current data: null")
+                _marcadorActual.value = marker!!
             }
         }
+
     }
 
     fun addMarker(info: Info) {
@@ -241,6 +244,24 @@ class MapAppViewModel : ViewModel() {
     fun deleteMarker(markerId: Info){
         repository.deleteMarker(markerId.markerId!!)
             getMarkers()
+    }
+
+    fun editMarker(titulo: String, descripcion: String, imagen : String?, categoria: String?, markerId : String){
+        repository.editMarker(
+            Info(
+                userId.value!!,
+                markerId,
+                titulo,
+                _geolocalizar.value!!.latitude,
+                _geolocalizar.value!!.longitude,
+                descripcion,
+                imagen,
+                categoria
+            )
+        )
+        getMarkers()
+
+
     }
 
 }
