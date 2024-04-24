@@ -129,103 +129,79 @@ fun MarcadorItem(
     navController: NavController
 ) {
     Card(
-        border = BorderStroke(4.dp, color = Color(0xFF152935)),
+        border = BorderStroke(4.dp, Color(0xFF2A4165)),
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
             .clickable {
-                navController.navigate(Routes.DescripcionScreen.route); myViewModel.getMarker(
-                marcador.markerId!!
-            )
+                navController.navigate(Routes.DescripcionScreen.route)
+                myViewModel.getMarker(marcador.markerId!!)
             }
             .background(color = Color(0xFF2A4165))
-
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier
-                .padding(top = 5.dp)
+                .padding(16.dp)
+                .fillMaxWidth()
                 .fillMaxHeight()
-                .background(color = Color(0xFF2A4165))
+                .background(Color(0xFF2A4165)),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceEvenly
         ) {
-            Row(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-            ) {
-                GlideImage(
-                    model = marcador.imagen,
-                    contentDescription = "33",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(150.dp)
-                )
+            GlideImage(
+                model = marcador.imagen,
+                contentDescription = "Imagen del marcador",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(150.dp).padding(top = 25.dp)
+            )
+
+            Text(
+                text = marcador.titulo,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFB7CBF4),
+                    fontSize = 20.sp
+                ),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 25.dp)
+            )
+
+
+
+            Text(
+                text = marcador.descripcion ?: "",
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFB7CBF4),
+                    fontSize = 20.sp
+                ),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(top = 25.dp)
+            )
+
+            marcador.categoria?.let {
                 Text(
-                    text = marcador.titulo,
+                    text = it,
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFFB7CBF4),
                         fontSize = 20.sp
-
                     ),
                     textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 0.dp)
-                )
-
-                Divider(
-                    color = Color.Black, modifier = Modifier
-                        .fillMaxWidth()
-                        .height(8.dp)
+                    modifier = Modifier.fillMaxWidth().padding(top = 25.dp)
                 )
             }
-            Row(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
+
+            IconButton(
+                onClick = { myViewModel.deleteMarker(marcador) },
+                modifier = Modifier.align(Alignment.End)
             ) {
-                Text(
-                    text = marcador.descripcion,
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFB7CBF4),
-                        fontSize = 20.sp
-
-                    ),
-                    textAlign = TextAlign.Left,
-                    modifier = Modifier
-                        .fillMaxSize()
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = "Cerrar",
+                    tint = Color.Cyan
                 )
             }
 
-            Row(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-            ) {
-                marcador.categoria?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFB7CBF4),
-                            fontSize = 20.sp
-
-                        ),
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier
-                            .fillMaxSize()
-                    )
-                }
-            }
-
-                IconButton(onClick = { myViewModel.deleteMarker(marcador) }) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = "Close",
-                        tint = Color.Cyan
-                    )
-                }
         }
     }
 }
